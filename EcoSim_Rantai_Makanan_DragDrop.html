@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EcoSim: Rantai Makanan</title>
+<style>
+:root{--ink:#17324d;--muted:#60758a;--bg:#eef7f0;--card:#fff;--green:#42a85f;--green2:#dff4e3;--blue:#4e8edb;--yellow:#f4c95d;--red:#df735f;--purple:#8d70c8;--shadow:0 12px 30px #17324d18}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:linear-gradient(#dff3e4,#eef7f0);min-height:100vh}
+button{font:inherit;border:0;cursor:pointer;min-height:48px}.hidden{display:none!important}
+.app{max-width:1250px;margin:auto;padding:18px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.logo{font-weight:900;font-size:1.2rem}.score{background:#fff;padding:9px 14px;border-radius:14px;box-shadow:var(--shadow);font-weight:800}
+.screen{transition:.35s}.welcome{min-height:calc(100vh - 80px);display:grid;place-items:center}.hero{background:#fff;border-radius:30px;padding:38px;text-align:center;box-shadow:var(--shadow);max-width:900px;overflow:hidden}
+.hero h1{font-size:clamp(2.2rem,6vw,4.5rem);margin:0 0 8px}.hero p{color:var(--muted);font-size:1.1rem}.field{height:260px;position:relative;margin:20px 0;border-radius:24px;background:linear-gradient(#aee1f7 0 42%,#b9df83 42%);overflow:hidden}
+.sun{position:absolute;right:8%;top:22px;width:58px;height:58px;border-radius:50%;background:#f7ca62}
+.rice{position:absolute;bottom:0;left:0;right:0;height:55%;background:repeating-linear-gradient(90deg,#83bb55 0 14px,#9ccc63 14px 28px);clip-path:polygon(0 35%,100% 10%,100% 100%,0 100%)}
+.animal{position:absolute;font-size:50px;filter:drop-shadow(0 5px 3px #17324d30);animation:bob 2.5s ease-in-out infinite}.a1{left:12%;bottom:25%}.a2{left:37%;bottom:34%;animation-delay:.3s}.a3{left:60%;bottom:27%;animation-delay:.6s}.a4{right:11%;top:24%;animation-delay:.9s}
+@keyframes bob{50%{transform:translateY(-7px)}}.cta{background:var(--green);color:#fff;padding:14px 26px;border-radius:16px;font-weight:900;font-size:1.05rem;box-shadow:0 7px 0 #338448;animation:pulse 2s infinite}
+@keyframes pulse{50%{transform:scale(1.025)}} .intro{margin-top:16px;font-size:.95rem;color:var(--muted)}
+.game-head{background:#fff;border-radius:20px;padding:15px 18px;box-shadow:var(--shadow);margin-bottom:14px}.scenario-title{font-size:1.2rem;font-weight:900}.scenario-desc{color:var(--muted);margin-top:4px}.progress{height:8px;background:#e7edf1;border-radius:99px;overflow:hidden;margin-top:10px}.progress>i{display:block;height:100%;background:var(--green);transition:.4s}
+.layout{display:grid;grid-template-columns:1fr 1.15fr;gap:14px}.panel{background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:16px}.panel h2{font-size:1rem;margin:0 0 12px}
+.chain{display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:15px;flex-wrap:wrap}.chain .node{padding:8px 10px;border-radius:12px;background:var(--green2);font-weight:800}.arrow{color:var(--muted)}
+.eco{height:390px;position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(#bce8fa 0 38%,#b4d779 38%);border:1px solid #d5e4d8}
+.eco:after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;background:repeating-linear-gradient(90deg,#7eae50 0 10px,#94c25f 10px 20px);opacity:.9}
+.creatures{position:absolute;inset:0;z-index:2}.creature{position:absolute;transition:left .7s,top .7s,opacity .5s,transform .5s;font-size:34px}.ricePlant{font-size:30px}.pop-card{position:absolute;z-index:4;background:#ffffffdd;backdrop-filter:blur(4px);border-radius:12px;padding:6px 9px;font-size:.78rem;font-weight:800;box-shadow:0 5px 15px #17324d18}
+.pc1{left:8px;bottom:8px}.pc2{left:8px;top:8px}.pc3{right:8px;bottom:8px}.pc4{right:8px;top:8px}
+.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.stat{background:#f6faf7;border-radius:14px;padding:9px}.stat strong{display:block;font-size:.8rem}.bar{height:8px;background:#dfe8e1;border-radius:99px;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green);transition:width .7s}.num{font-weight:900;font-size:1.05rem}
+.workspace{min-height:250px;background:#f3f7fb;border:2px dashed #b9c9d6;border-radius:16px;padding:12px}.slot{min-height:58px;border-radius:12px;background:#fff;border:1px solid #dbe4ea;margin-bottom:8px;padding:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--muted)}
+.block{display:inline-flex;align-items:center;gap:5px;padding:10px 12px;border-radius:10px;color:#fff;font-weight:850;box-shadow:0 3px 0 #0002;user-select:none;transition:.2s}.block:hover{transform:translateY(-2px)}.cond{background:var(--purple)}.org{background:var(--blue)}.change{background:var(--green)}.act{background:var(--yellow);color:#5a4817}.remove{background:#fff0ed;color:#a74b3d;border:1px solid #efc1b7;box-shadow:none}
+.palette{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:10px}.palette .block{justify-content:center;font-size:.83rem}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.run{background:var(--green);color:#fff;border-radius:13px;padding:11px 16px;font-weight:900}.clear{background:#e9eff3;color:var(--ink);border-radius:13px;padding:11px 16px;font-weight:800}.hint{margin-top:10px;color:var(--muted);font-size:.86rem}
+.feedback{margin-top:12px;border-radius:16px;padding:13px;background:#eef8f0;border-left:5px solid var(--green);min-height:68px}.feedback.bad{background:#fff4ef;border-left-color:var(--red)}.feedback strong{display:block;margin-bottom:3px}.cause{margin-top:8px;font-size:.88rem;color:#42596b}
+.next{background:var(--blue);color:#fff;border-radius:13px;padding:11px 16px;font-weight:900}
+.end{text-align:center;background:#fff;border-radius:28px;box-shadow:var(--shadow);padding:35px}.end h1{margin-top:0}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;text-align:left;margin:20px 0}.summary div{background:#f3f8f4;border-radius:14px;padding:13px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.eco{height:330px}.legend{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.app{padding:10px}.hero{padding:22px}.palette{grid-template-columns:1fr}.field{height:220px}.animal{font-size:40px}.summary{grid-template-columns:1fr}}
+.shake{animation:shake .35s}.flash{animation:flash .45s}@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}@keyframes flash{50%{box-shadow:0 0 0 5px #8bd59a}}
+
+<style>
+.scratch-workspace{background:#eef4fb!important;border:2px solid #cbd9e6!important}
+.palette .block{cursor:grab;touch-action:none}
+.palette .block.dragging{opacity:.45}
+.palette .block.selected{outline:4px solid #f4c95d;outline-offset:2px}
+.drop-slot.over{border-color:#4e8edb!important;background:#eaf3ff!important}
+</style>
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="welcome" class="screen welcome">
+    <section class="hero">
+      <div class="field">
+        <div class="sun"></div><div class="rice"></div>
+        <div class="animal a1">🌾</div><div class="animal a2">🐭</div><div class="animal a3">🐍</div><div class="animal a4">🦅</div>
+      </div>
+      <h1>EcoSim: Rantai Makanan</h1>
+      <p><b>Susun kode, jalankan ekosistem, temukan akibatnya!</b></p>
+      <p>Ubah satu bagian rantai makanan dan lihat apa yang terjadi pada seluruh ekosistem.</p>
+      <button class="cta" onclick="startGame()">MULAI SIMULASI</button>
+      <div class="intro">Mode kelompok • 5 misi • sekitar 5 menit</div>
+    </section>
+  </div>
+
+  <div id="game" class="screen hidden">
+    <div class="topbar"><div class="logo">🌾 EcoSim: Rantai Makanan</div><div class="score">Skor: <span id="score">0</span></div></div>
+    <div class="game-head">
+      <div class="scenario-title" id="stitle"></div><div class="scenario-desc" id="sdesc"></div>
+      <div class="progress"><i id="prog"></i></div>
+    </div>
+    <div class="layout">
+      <section class="panel">
+        <h2>💻 Susun aturan coding</h2>
+        <div class="chain"><span class="node">🌾 Padi</span><span class="arrow">→</span><span class="node">🐭 Tikus</span><span class="arrow">→</span><span class="node">🐍 Ular</span><span class="arrow">→</span><span class="node">🦅 Elang</span></div>
+        <div id="workspace" class="workspace scratch-workspace"><div class="slot" id="slot1">Pilih blok untuk mengisi kondisi…</div><div class="slot" id="slot2">Pilih blok untuk mengisi dampak…</div></div>
+        <div class="palette" id="palette"></div>
+        <div class="actions"><button class="run" onclick="runSim()">▶ Jalankan Simulasi</button><button class="clear" onclick="clearBlocks()">Hapus blok</button></div>
+        <div class="hint">Tip: pikirkan siapa yang dimakan dan siapa yang memakannya.</div>
+        <div id="feedback" class="feedback"><strong>Siap bereksperimen!</strong> Susun dua blok untuk membuat satu aturan.</div>
+      </section>
+      <section class="panel">
+        <h2>🌾 Ekosistem sawah</h2>
+        <div class="eco"><div class="creatures" id="creatures"></div>
+          <div class="pop-card pc1">🌾 Padi: <span id="padi">100</span></div>
+          <div class="pop-card pc2">🐭 Tikus: <span id="tikus">20</span></div>
+          <div class="pop-card pc3">🐍 Ular: <span id="ular">8</span></div>
+          <div class="pop-card pc4">🦅 Elang: <span id="elang">3</span></div>
+        </div>
+        <div class="legend">
+          <div class="stat"><strong>🌾 Padi</strong><span class="num" id="n-padi">100</span><div class="bar"><i id="b-padi"></i></div></div>
+          <div class="stat"><strong>🐭 Tikus</strong><span class="num" id="n-tikus">20</span><div class="bar"><i id="b-tikus"></i></div></div>
+          <div class="stat"><strong>🐍 Ular</strong><span class="num" id="n-ular">8</span><div class="bar"><i id="b-ular"></i></div></div>
+          <div class="stat"><strong>🦅 Elang</strong><span class="num" id="n-elang">3</span><div class="bar"><i id="b-elang"></i></div></div>
+        </div>
+        <div id="nextWrap" class="actions hidden"><button class="next" onclick="nextScenario()">Lanjut ke misi berikutnya →</button></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="end" class="screen hidden">
+    <section class="end">
+      <h1>🌱 Ekosistem selesai dijelajahi!</h1>
+      <p id="finalText"></p>
+      <div class="summary"><div><b>Skor akhir</b><br><span id="finalScore"></span></div><div><b>Misi berhasil</b><br><span id="finalMissions"></span></div><div><b>Konsep utama</b><br>Perubahan satu organisme dapat memengaruhi organisme lain.</div><div><b>Contoh</b><br>Ular berkurang → tikus dapat meningkat → padi dapat berkurang.</div></div>
+      <button class="cta" onclick="startGame()">MAIN LAGI</button>
+    </section>
+  </div>
+</div>
+
+<script>
+const SCENARIOS_DATA=[
+ {title:"Misi 1 — Ular berkurang",desc:"Populasi ular turun. Prediksi apa yang terjadi pada tikus?",answer:["ULAR BERKURANG","TIKUS BERTAMBAH"],effect:{ular:-3,tikus:5,padi:-12,elang:0},cause:"Lebih sedikit ular berarti lebih sedikit tikus yang dimangsa. Tikus dapat meningkat dan kemudian memakan lebih banyak padi."},
+ {title:"Misi 2 — Semua ular hilang",desc:"Semua ular hilang dari sawah. Susun aturan yang menjelaskan dampak langsungnya.",answer:["ULAR HABIS","TIKUS BERTAMBAH"],effect:{ular:-8,tikus:8,padi:-18,elang:-1},cause:"Tanpa ular, tikus kehilangan salah satu pemangsanya. Tikus meningkat; padi ikut tertekan karena lebih banyak dimakan. Elang juga dapat kekurangan mangsa."},
+ {title:"Misi 3 — Tikus meningkat",desc:"Tikus bertambah banyak. Apa dampak langsung yang perlu kamu pikirkan?",answer:["TIKUS BERTAMBAH","PADI BERKURANG"],effect:{ular:1,tikus:6,padi:-20,elang:0},cause:"Semakin banyak tikus, semakin banyak padi yang dimakan. Populasi padi dapat berkurang."},
+ {title:"Misi 4 — Padi berkurang",desc:"Padi berkurang drastis. Organisme mana yang kekurangan makanan?",answer:["PADI BERKURANG","TIKUS BERKURANG"],effect:{ular:-1,tikus:-7,padi:-35,elang:0},cause:"Tikus bergantung pada padi sebagai makanan. Jika padi berkurang drastis, tikus dapat ikut berkurang."},
+ {title:"Misi 5 — Rantai ikut berubah",desc:"Ekosistem berubah. Buat aturan yang menghubungkan perubahan ular dengan perubahan padi.",answer:["ULAR BERKURANG","PADI BERKURANG"],effect:{ular:-4,tikus:7,padi:-22,elang:-1},cause:"Ular berkurang → tikus dapat meningkat → tikus memakan lebih banyak padi. Dampak dapat merambat sepanjang rantai makanan."}
+];
+const BLOCKS=[
+ ["cond","JIKA","JIKA"],
+ ["org","PADI BERKURANG","PADI BERKURANG"],["org","PADI BERTAMBAH","PADI BERTAMBAH"],
+ ["org","TIKUS BERKURANG","TIKUS BERKURANG"],["org","TIKUS BERTAMBAH","TIKUS BERTAMBAH"],
+ ["org","ULAR BERKURANG","ULAR BERKURANG"],["org","ULAR BERTAMBAH","ULAR BERTAMBAH"],["org","ULAR HABIS","ULAR HABIS"],
+ ["org","ELANG BERKURANG","ELANG BERKURANG"],["org","ELANG BERTAMBAH","ELANG BERTAMBAH"],
+ ["change","BERKURANG","BERKURANG"],["change","BERTAMBAH","BERTAMBAH"],["change","HABIS","HABIS"],
+ ["act","MAKA","MAKA"],
+ ["act","PADI BERKURANG","PADI BERKURANG"],["act","PADI BERTAMBAH","PADI BERTAMBAH"],
+ ["act","TIKUS BERKURANG","TIKUS BERKURANG"],["act","TIKUS BERTAMBAH","TIKUS BERTAMBAH"],
+ ["act","ULAR BERKURANG","ULAR BERKURANG"],["act","ULAR BERTAMBAH","ULAR BERTAMBAH"],
+ ["act","ELANG BERKURANG","ELANG BERKURANG"],["act","ELANG BERTAMBAH","ELANG BERTAMBAH"]
+];
+let scenario=0,score=0,missions=0,state={padi:100,tikus:20,ular:8,elang:3},chosen=[null,null],locked=false;
+function startGame(){scenario=0;score=0;missions=0;locked=false;document.getElementById("welcome").classList.add("hidden");document.getElementById("end").classList.add("hidden");document.getElementById("game").classList.remove("hidden");loadScenario()}
+function loadScenario(){locked=false;chosen=[null,null];state={padi:100,tikus:20,ular:8,elang:3};const s=SCENARIOS_DATA[scenario];document.getElementById("stitle").textContent=s.title;document.getElementById("sdesc").textContent=s.desc;document.getElementById("prog").style.width=((scenario+1)/5*100)+"%";document.getElementById("score").textContent=score;document.getElementById("feedback").className="feedback";document.getElementById("feedback").innerHTML="<strong>Siap bereksperimen!</strong> Susun dua blok untuk membuat satu aturan.";document.getElementById("nextWrap").classList.add("hidden");renderWorkspace();renderPalette();renderState()}
+
+let selectedBlock=null;
+function renderPalette(){
+  const p=document.getElementById("palette"); p.innerHTML="";
+  BLOCKS.forEach(b=>{
+    const x=document.createElement("button");
+    x.className="block "+b[0]; x.textContent=b[1]; x.draggable=true;
+    x.addEventListener("dragstart",e=>{
+      selectedBlock=b[2]; x.classList.add("dragging");
+      e.dataTransfer.setData("text/plain",b[2]);
+    });
+    x.addEventListener("dragend",()=>x.classList.remove("dragging"));
+    x.addEventListener("click",()=>{
+      if(locked)return;
+      selectedBlock=b[2];
+      document.querySelectorAll(".palette .block").forEach(z=>z.classList.remove("selected"));
+      x.classList.add("selected");
+    });
+    p.appendChild(x);
+  });
+  bindDropSlots();
+}
+function bindDropSlots(){
+  document.querySelectorAll(".slot").forEach(slot=>{
+    slot.classList.add("drop-slot");
+    slot.addEventListener("dragover",e=>{e.preventDefault();slot.classList.add("over")});
+    slot.addEventListener("dragleave",()=>slot.classList.remove("over"));
+    slot.addEventListener("drop",e=>{
+      e.preventDefault();slot.classList.remove("over");
+      putBlock(+slot.id.replace("slot","")-1,e.dataTransfer.getData("text/plain"));
+    });
+    slot.addEventListener("click",()=>{
+      if(selectedBlock&&!locked){
+        putBlock(+slot.id.replace("slot","")-1,selectedBlock);
+        selectedBlock=null;
+        document.querySelectorAll(".palette .block").forEach(z=>z.classList.remove("selected"));
+      }
+    });
+  });
+}
+function putBlock(slot,label){
+  if(!locked&&label){chosen[slot]=label;renderWorkspace();}
+}
+function renderWorkspace(){
+  const a=document.getElementById("slot1"), b=document.getElementById("slot2");
+  [a,b].forEach((slot,i)=>{
+    const v=chosen[i];
+    if(v){
+      slot.classList.add("filled");
+      slot.innerHTML='<span class="block '+(i===0?'cond':'act')+' code-block">'+v+' ×</span>';
+      slot.querySelector(".code-block").onclick=()=>{
+        if(!locked){chosen[i]=null;renderWorkspace();}
+      };
+    }else{
+      slot.classList.remove("filled");
+      slot.textContent=i===0?"Seret kondisi ke sini":"Seret dampak ke sini";
+    }
+  });
+}
+function clearBlocks(){
+  if(!locked){chosen=[null,null];selectedBlock=null;renderWorkspace();}
+}
+function runSim(){if(locked)return;if(!chosen[0]||!chosen[1]){bad("Lengkapi dulu dua bagian aturan coding.","Pilih kondisi dan dampak.");return}
+const s=SCENARIOS_DATA[scenario];
+const validPairs=[
+ ["ULAR BERKURANG","TIKUS BERTAMBAH"],["ULAR HABIS","TIKUS BERTAMBAH"],
+ ["TIKUS BERTAMBAH","PADI BERKURANG"],["PADI BERKURANG","TIKUS BERKURANG"],
+ ["ULAR BERKURANG","PADI BERKURANG"],["TIKUS BERKURANG","ULAR BERKURANG"],
+ ["PADI BERTAMBAH","TIKUS BERTAMBAH"],["TIKUS BERTAMBAH","ULAR BERTAMBAH"],
+ ["ULAR BERTAMBAH","TIKUS BERKURANG"],["ELANG BERKURANG","ULAR BERTAMBAH"],
+ ["ULAR BERKURANG","ELANG BERKURANG"]
+];
+const exact=chosen[0]===s.answer[0]&&chosen[1]===s.answer[1];
+const causal=validPairs.some(x=>x[0]===chosen[0]&&x[1]===chosen[1]);
+if(!causal){bad("Belum tepat. Coba pikirkan hubungan makan-dimakan.","Contoh: jika ular berkurang, tikus dapat bertambah karena lebih sedikit dimangsa.");return}
+locked=true;score+=exact?10:5;missions++;
+const effect=exact?s.effect:deriveEffect(chosen[0],chosen[1],s.effect);
+good(exact?"Benar! Aturanmu sesuai dengan misi.":"Hubungannya masuk akal! Coba amati perubahan yang terjadi.",explainPair(chosen[0],chosen[1]));
+animateState(effect);document.getElementById("nextWrap").classList.remove("hidden");document.getElementById("score").textContent=score}
+
+function deriveEffect(a,b,fallback){
+ const e={padi:0,tikus:0,ular:0,elang:0};
+ const map={"PADI": "padi","TIKUS":"tikus","ULAR":"ular","ELANG":"elang"};
+ const m=b.match(/^(PADI|TIKUS|ULAR|ELANG)/); if(m){
+   const k=map[m[1]]; e[k]=b.includes("BERTAMBAH")?5:-5;
+ }
+ if(a==="ULAR BERKURANG"||a==="ULAR HABIS") e.tikus+=4;
+ if(a==="TIKUS BERTAMBAH") e.padi-=10;
+ if(a==="PADI BERKURANG") e.tikus-=4;
+ if(a==="ELANG BERKURANG") e.ular+=2;
+ if(a==="ULAR BERKURANG") e.elang-=1;
+ return e;
+}
+function explainPair(a,b){
+ const text={"ULAR BERKURANG|TIKUS BERTAMBAH":"Ular lebih sedikit berarti lebih sedikit tikus yang dimangsa.",
+ "ULAR HABIS|TIKUS BERTAMBAH":"Tanpa ular, tikus kehilangan salah satu pemangsanya.",
+ "TIKUS BERTAMBAH|PADI BERKURANG":"Lebih banyak tikus berarti lebih banyak padi yang dimakan.",
+ "PADI BERKURANG|TIKUS BERKURANG":"Jika padi berkurang, tikus dapat kekurangan makanan.",
+ "ULAR BERKURANG|PADI BERKURANG":"Ular berkurang → tikus dapat meningkat → padi lebih banyak dimakan.",
+ "TIKUS BERKURANG|ULAR BERKURANG":"Jika tikus berkurang, ular dapat kekurangan makanan.",
+ "PADI BERTAMBAH|TIKUS BERTAMBAH":"Lebih banyak padi menyediakan lebih banyak makanan bagi tikus.",
+ "TIKUS BERTAMBAH|ULAR BERTAMBAH":"Lebih banyak tikus menyediakan lebih banyak mangsa bagi ular.",
+ "ULAR BERTAMBAH|TIKUS BERKURANG":"Lebih banyak ular dapat memangsa lebih banyak tikus.",
+ "ELANG BERKURANG|ULAR BERTAMBAH":"Elang berkurang dapat membuat lebih sedikit ular dimangsa.",
+ "ULAR BERKURANG|ELANG BERKURANG":"Jika ular berkurang, elang dapat kekurangan salah satu sumber makanannya."};
+ return text[a+"|"+b]||"Perubahan satu populasi dapat memengaruhi populasi lain dalam rantai makanan.";
+}
+function bad(a,b){const f=document.getElementById("feedback");f.className="feedback bad shake";f.innerHTML="<strong>"+a+"</strong><div class='cause'>"+b+"</div>";setTimeout(()=>f.classList.remove("shake"),400)}
+function good(a,b){const f=document.getElementById("feedback");f.className="feedback flash";f.innerHTML="<strong>"+a+"</strong><div class='cause'>"+b+"</div>";setTimeout(()=>f.classList.remove("flash"),500)}
+function animateState(e){const keys=["ular","tikus","padi","elang"];keys.forEach((k,i)=>{setTimeout(()=>{state[k]=Math.max(0,state[k]+e[k]);renderState();},i*650)})}
+function renderState(){for(const k of ["padi","tikus","ular","elang"]){document.getElementById(k).textContent=state[k];document.getElementById("n-"+k).textContent=state[k];document.getElementById("b-"+k).style.width=Math.min(100,state[k]/(k==="padi"?100:20)*100)+"%"}renderCreatures()}
+function renderCreatures(){const c=document.getElementById("creatures");c.innerHTML="";const defs=[["padi","🌾",30],["tikus","🐭",20],["ular","🐍",8],["elang","🦅",3]];defs.forEach(([k,emo,max],idx)=>{const n=Math.min(max,Math.ceil(state[k]/(k==="padi"?4:1)));for(let i=0;i<n;i++){const d=document.createElement("span");d.className="creature";d.textContent=emo;const x=8+((i*37+idx*61)%84),y=45+((i*23+idx*17)%45);d.style.left=x+"%";d.style.top=y+"%";if(k==="elang")d.style.top=(8+(i*18))+"%";if(k==="padi")d.classList.add("ricePlant");c.appendChild(d)}})}
+function nextScenario(){if(scenario<4){scenario++;loadScenario()}else{document.getElementById("game").classList.add("hidden");document.getElementById("end").classList.remove("hidden");document.getElementById("finalScore").textContent=score+" poin";document.getElementById("finalMissions").textContent=missions+" dari 5 misi";document.getElementById("finalText").textContent=missions===5?"Hebat! Kalian berhasil menjalankan seluruh eksperimen dan melihat bagaimana perubahan dapat merambat dalam rantai makanan.":"Kalian sudah mencoba semua misi. Coba lagi untuk melihat apakah aturan coding dapat disusun lebih tepat."}}
+</script>
+</body>
+</html>
